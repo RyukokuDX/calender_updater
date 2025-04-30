@@ -1,0 +1,92 @@
+# LLM API Settings
+llm:
+  providers:
+    openai:  # OpenAI API
+      api_key: ""  # Your OpenAI API key here
+      model: "gpt-4"
+      temperature: 0.7
+      max_tokens: 1000
+      prompt:
+        system: "あなたは文章を要約する専門家です。与えられた文章を簡潔に要約し、カレンダーイベントとして適切な形式で出力してください。"
+        user_template: |
+          以下の文章を要約し、カレンダーイベントとして適切な形式で出力してください：
+          
+          文章：
+          {text}
+          
+          追加指示：
+          {additional_instructions}
+    anthropic:  # Anthropic Claude API
+      api_key: ""  # Your Anthropic API key here
+      model: "claude-3-opus"
+      temperature: 0.7
+      max_tokens: 1000
+      prompt:
+        system: "あなたは文章を要約する専門家です。与えられた文章を簡潔に要約し、カレンダーイベントとして適切な形式で出力してください。"
+        user_template: |
+          以下の文章を要約し、カレンダーイベントとして適切な形式で出力してください：
+          
+          文章：
+          {text}
+          
+          追加指示：
+          {additional_instructions}
+    gemini:  # Google Gemini API
+      api_key: ""  # Your Google API key here
+      model: "gemini-pro"
+      temperature: 0.7
+      max_tokens: 1000
+      prompt:
+        system: "あなたは文章を要約する専門家です。与えられた文章を簡潔に要約し、カレンダーイベントとして適切な形式で出力してください。"
+        user_template: |
+          以下の文章を要約し、カレンダーイベントとして適切な形式で出力してください：
+          
+          文章：
+          {text}
+          
+          追加指示：
+          {additional_instructions}
+  default_provider: "openai"  # デフォルトで使用するプロバイダー
+
+# Google Calendar Settings
+google_calendar:
+  credentials_file: "credentials.json"  # Path to Google Calendar API credentials
+  token_file: "token.json"  # Path to store the token
+  calendars:
+    work:  # 仕事用カレンダー
+      id: ""  # カレンダーID
+      name: "仕事"
+      color_id: "1"  # Googleカレンダーの色ID
+      default_duration: 60
+    personal:  # 個人用カレンダー
+      id: ""
+      name: "個人"
+      color_id: "2"
+      default_duration: 30
+    project:  # プロジェクト用カレンダー
+      id: ""
+      name: "プロジェクト"
+      color_id: "3"
+      default_duration: 90
+  default_calendar: "work"  # デフォルトで使用するカレンダー
+
+# Application Settings
+app:
+  window:
+    title: "Calendar Updater"
+    width: 800
+    height: 600
+  default_input_directory: "./input"  # Directory for input files
+  default_output_directory: "./output"  # Directory for output files
+  supported_file_types:
+    - ".txt"
+    - ".md"
+    - ".doc"
+    - ".docx"
+    - ".pdf"
+
+# Summary Settings
+summary:
+  max_length: 500  # Maximum length of summary
+  include_metadata: true  # Whether to include metadata in summary
+  default_language: "ja"  # Default language for summaries 

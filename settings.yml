@@ -1,0 +1,139 @@
+# LLM API Settings
+llm:
+  providers:
+    gemini:  # Google Gemini API
+      api_key: ${GeminiApiKey}  # API key from environment variable
+      model: "gemini-1.5-flash"
+      temperature: 0.7
+      max_tokens: 1000
+      prompt:
+        system: |
+          あなたは文章を要約する専門家です。与えられた文章を簡潔に要約し、カレンダーイベントとして適切な形式で出力してください。
+          descrpitionは絵文字などを使った箇条書きとしてください。
+          
+          現在は{{ current_year }}年です。
+          
+          入力の種類と処理方法：
+          1. ファイルからの入力の場合：
+             - ヘッダー、フッター、ページ番号は無視してください
+             - 文書の構造（見出し、箇条書きなど）は保持してください
+             - ファイル名やメタデータは、イベントの説明に含めてください
+          
+          2. 直接テキスト入力の場合：
+             - テキストの文脈を保持してください
+             - 入力元の情報（チャット、メール、メモなど）があれば、説明に含めてください
+          
+          3. 両方の入力がある場合：
+             - ファイルとテキストの内容を統合して要約してください
+             - 重複する情報は統合してください
+             - ファイルのメタデータとテキストの文脈の両方を考慮してください
+             - 日時情報は、より具体的な方を優先してください
+          
+          共通の処理：
+          - 重要な日時情報があれば、それを優先的にイベントの日時として使用してください
+          - 場所情報があれば、イベントの場所として設定してください
+          - 参加者情報があれば、イベントの説明に含めてください
+          
+          必ず以下の形式でJSON形式の出力を行ってください：
+          {
+            "summary": "イベントのタイトル",
+            "description": "イベントの詳細説明",
+            "start": {
+              "dateTime": "YYYY-MM-DDTHH:mm:ss+09:00",
+              "timeZone": "Asia/Tokyo"
+            },
+            "end": {
+              "dateTime": "YYYY-MM-DDTHH:mm:ss+09:00",
+              "timeZone": "Asia/Tokyo"
+            },
+            "location": "場所（オプション）"
+          }
+        user_template: |
+          以下の文章を要約し、カレンダーイベントとして適切な形式で出力してください：
+          
+          {% if filename %}
+          ファイル情報：
+          - ファイル名: {{ filename }}
+          - ファイル形式: {{ filetype }}
+          - 作成日時: {{ creation_time }}
+          
+          ファイルの内容：
+          {{ file_content }}
+          {% endif %}
+          
+          {% if direct_text %}
+          追加テキスト：
+          {{ direct_text }}
+          {% endif %}
+          
+          {% if additional_instructions %}
+          追加指示：
+          {{ additional_instructions }}
+          {% endif %}
+  default_provider: "gemini"  # デフォルトで使用するプロバイダー
+
+# Google Calendar Settings
+google_calendar:
+  credentials_file: config/${GoogleCalendarCredentialsFile} # 認証情報ファイルのパス（環境変数推奨）
+  token_file: "token.json"  # Path to store the token
+  scopes: ["https://www.googleapis.com/auth/calendar.events"]  # 必要なスコープ
+  calendars:
+    default:  # デフォルトカレンダー
+      id: ${GoogleCalenderDaigakuID}  # カレンダーID（環境変数推奨） 
+      name: "予定表"
+      color_id: "1"  # Googleカレンダーの色ID
+      default_duration: 60
+  default_calendar: "default"  # デフォルトで使用するカレンダー
+  output_format:
+    type: "json"  # json or ics
+    timezone: "Asia/Tokyo"
+    date_format: "%Y-%m-%dT%H:%M:%S%z"
+    default_duration: 60  # デフォルトのイベント時間（分）
+    save_to_calendar: true  # Google Calendarに保存するかどうか
+    save_to_file: true  # JSONファイルとしても保存するかどうか
+    output_directory: "./output"  # 出力ファイルの保存先
+
+# Application Settings
+app:
+  window:
+    title: "Calendar Updater"
+    width: 800
+    height: 600
+  default_input_directory: "./input"  # Directory for input files
+  default_output_directory: "./output"  # Directory for output files
+  editor_command: "notepad"  # 設定ファイル編集用のエディタコマンド（例: notepad, open, gedit, xdg-open など）
+  file_processing:
+    supported_file_types:
+      txt:
+        encoding: "utf-8"
+        max_size_mb: 10
+      md:
+        encoding: "utf-8"
+        max_size_mb: 10
+      doc:
+        converter: "python-docx"
+        max_size_mb: 20
+      docx:
+        converter: "python-docx"
+        max_size_mb: 20
+      pdf:
+        converter: "pdfplumber"
+        max_size_mb: 30
+    text_extraction:
+      remove_headers: true
+      remove_footers: true
+      remove_page_numbers: true
+      preserve_formatting: false
+    batch_processing:
+      max_files_per_batch: 10
+      timeout_seconds: 300
+    error_handling:
+      skip_invalid_files: true
+      log_errors: true
+      error_log_file: "error.log"
+
+# Summary Settings
+summary:
+  max_length: 500  # Maximum length of summary
+  include_metadata: true  # Whether to include metadata in summary
+  default_language: "ja"  # Default language for summaries 
