@@ -74,8 +74,7 @@ llm:
 
 # Google Calendar Settings
 google_calendar:
-  credentials_file: config/${GoogleCalendarCredentialsFile} # 認証情報ファイルのパス（環境変数推奨）
-  token_file: "token.json"  # Path to store the token
+  credentials_file: ${APP_DIR}/config/${GoogleCalendarCredentialsFile} # 認証情報ファイルのパス（環境変数推奨）
   scopes: ["https://www.googleapis.com/auth/calendar.events"]  # 必要なスコープ
   calendars:
     default:  # デフォルトカレンダー

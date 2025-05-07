@@ -26,11 +26,25 @@ def expand_env_vars(obj):
         return obj
 
 def load_settings():
-    settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.yml')
-    with open(settings_path, 'r', encoding='utf-8') as f:
-        settings = yaml.safe_load(f)
-    settings = expand_env_vars(settings)
-    return settings
+    try:
+        settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.yml')
+        if not os.path.exists(settings_path):
+            # サンプル設定ファイルをコピー
+            sample_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings_sample.yml')
+            if os.path.exists(sample_path):
+                import shutil
+                shutil.copy2(sample_path, settings_path)
+                messagebox.showinfo("設定ファイル", "settings.ymlが見つからないため、settings_sample.ymlからコピーしました。")
+            else:
+                raise FileNotFoundError("settings.ymlとsettings_sample.ymlの両方が見つかりません。")
+        
+        with open(settings_path, 'r', encoding='utf-8') as f:
+            settings = yaml.safe_load(f)
+        settings = expand_env_vars(settings)
+        return settings
+    except Exception as e:
+        messagebox.showerror("設定エラー", f"設定ファイルの読み込みに失敗しました: {str(e)}")
+        raise
 
 def setup_gemini(settings):
     api_key = os.getenv('GeminiApiKey')
@@ -230,6 +244,19 @@ class CalendarUpdaterApp:
             messagebox.showerror("エラー", f"settings.ymlの編集に失敗しました: {e}\nパス: {yml_path}")
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = CalendarUpdaterApp(root)
-    root.mainloop() 
+    try:
+        # 必要な環境変数のチェック
+        required_env_vars = ['GeminiApiKey', 'GoogleCalendarCredentialsFile', 'GoogleCalenderDaigakuID']
+        missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+        if missing_vars:
+            messagebox.showwarning(
+                "環境変数未設定",
+                f"以下の環境変数が設定されていません：\n{', '.join(missing_vars)}\n\n"
+                "アプリケーションは起動しますが、一部の機能が動作しない可能性があります。"
+            )
+        
+        root = tk.Tk()
+        app = CalendarUpdaterApp(root)
+        root.mainloop()
+    except Exception as e:
+        messagebox.showerror("起動エラー", f"アプリケーションの起動に失敗しました: {str(e)}") 
